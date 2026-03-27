@@ -1,0 +1,6 @@
+node_modules
+.yarn
+dist
+coverage
+meldungen.json
+betreff_counts.csv

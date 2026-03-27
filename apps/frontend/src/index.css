@@ -1,0 +1,73 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap");
+@import "leaflet/dist/leaflet.css";
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0a0c10;
+  --color-surface: #111318;
+  --color-border: #1e2229;
+  --color-accent: #e8ff3c;
+  --color-danger: #ff4c38;
+  --color-heat1: #00d4ff;
+  --color-text: #e2e4e8;
+  --color-muted: #5a5f6e;
+
+  --font-sans: "DM Sans", sans-serif;
+  --font-mono: "DM Mono", monospace;
+  --font-display: "Bebas Neue", sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Leaflet overrides */
+.leaflet-container {
+  background: #0a0c10 !important;
+}
+
+.leaflet-popup-content-wrapper {
+  background: rgba(17, 19, 24, 0.96) !important;
+  border: 1px solid #1e2229 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6) !important;
+  color: #e2e4e8 !important;
+}
+
+.leaflet-popup-tip {
+  background: rgba(17, 19, 24, 0.96) !important;
+}
+
+.leaflet-popup-close-button {
+  color: #5a5f6e !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e2229;
+  border-radius: 2px;
+}

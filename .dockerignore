@@ -1,0 +1,12 @@
+.DS_Store
+.env
+.env.*
+.git
+.idea
+.yarn
+node_modules
+dist
+coverage
+*.log
+**/node_modules
+**/dist

@@ -1,0 +1,49 @@
+{
+  "name": "ordnungsamt-berlin",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "yarn workspaces foreach -A -t run build",
+    "dev": "yarn workspaces foreach -A -p run dev",
+    "lint": "yarn workspaces foreach -A run lint",
+    "lint:fix": "yarn workspaces foreach -A run lint:fix",
+    "lint-staged": "lint-staged",
+    "allow-scripts": "allow-scripts run",
+    "allow-scripts:list": "allow-scripts list",
+    "format": "prettier . --write --ignore-unknown",
+    "format:check": "prettier . --check --ignore-unknown",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,cjs,mjs,ts,cts,mts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,html,json,md,yml,yaml}": "prettier --write"
+  },
+  "packageManager": "yarn@4.13.0",
+  "lavamoat": {
+    "allowScripts": {
+      "esbuild": true
+    }
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@lavamoat/allow-scripts": "^4.0.0",
+    "@lavamoat/preinstall-always-fail": "^3.0.0",
+    "eslint": "^10.1.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-unicorn": "^63.0.0",
+    "globals": "^17.4.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.57.2"
+  }
+}
