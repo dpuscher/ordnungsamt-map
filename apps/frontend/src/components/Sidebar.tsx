@@ -7,6 +7,7 @@ import { DistrictFilter } from "./DistrictFilter";
 import { CategoryList } from "./CategoryList";
 
 interface SidebarProps {
+  isOpen: boolean;
   overview: StatsOverview | null;
   categories: StatCategory[];
   statsLoading: boolean;
@@ -39,6 +40,7 @@ const labelStyle: React.CSSProperties = {
 };
 
 export function Sidebar({
+  isOpen,
   overview,
   categories,
   statsLoading,
@@ -57,14 +59,13 @@ export function Sidebar({
 }: SidebarProps) {
   return (
     <aside
+      className={`absolute md:relative h-full w-full md:w-[300px] flex-col shrink-0 overflow-y-auto shadow-2xl md:shadow-none ${
+        isOpen ? "flex" : "hidden md:flex"
+      }`}
       style={{
-        width: 300,
+        zIndex: 2000,
         background: "var(--color-surface)",
         borderRight: "1px solid var(--color-border)",
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-        flexShrink: 0,
       }}
     >
       {/* Stats */}

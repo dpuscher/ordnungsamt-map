@@ -14,8 +14,6 @@ export function CategoryList({ categories, active, onChange }: CategoryListProps
   return (
     <div
       style={{
-        flex: 1,
-        overflowY: "auto",
         padding: "0 16px 16px",
       }}
     >

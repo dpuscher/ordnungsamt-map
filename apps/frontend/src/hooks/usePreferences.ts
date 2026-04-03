@@ -76,7 +76,7 @@ export function usePreferences(): Preferences & PreferencesActions {
   const [mapLat, setMapLat] = useState(() => readPref("mapLat", DEFAULT_MAP_CENTER[0]));
   const [mapLng, setMapLng] = useState(() => readPref("mapLng", DEFAULT_MAP_CENTER[1]));
   const [mapZoom, setMapZoom] = useState(() => readPref("mapZoom", DEFAULT_MAP_ZOOM));
-  const [sidebarOpen, setSidebarOpenState] = useState(() => readPref("sidebarOpen", true));
+  const [sidebarOpen, setSidebarOpenState] = useState(() => readPref("sidebarOpen", false));
 
   // Sync URL params for shareable links
   useEffect(() => {
