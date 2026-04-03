@@ -6,12 +6,47 @@ import { cacheGet, cacheSet } from "../cache.js";
 
 const router = Router();
 
+function getClusterGridSize(zoom: number): number {
+  return Math.max(0.0005, 0.02 / 2 ** Math.max(zoom - 10, 0));
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+function getHeatGridSize(
+  zoom: number,
+  minLat?: number,
+  maxLat?: number,
+  minLng?: number,
+  maxLng?: number,
+): number {
+  const fallback = Math.max(0.00012, 0.012 / 2 ** Math.max(zoom - 9, 0));
+
+  if (
+    minLat === undefined ||
+    maxLat === undefined ||
+    minLng === undefined ||
+    maxLng === undefined
+  ) {
+    return fallback;
+  }
+
+  const latSpan = Math.abs(maxLat - minLat);
+  const lngSpan = Math.abs(maxLng - minLng);
+  const longestSpan = Math.max(latSpan, lngSpan);
+  const targetCells = zoom <= 10 ? 72 : zoom <= 12 ? 84 : 96;
+
+  return clamp(longestSpan / targetCells, 0.00012, 0.008);
+}
+
 function roundBbox(value: number): string {
   return value.toFixed(2);
 }
 
 function buildCacheKey(
   zoom: number,
+  displayMode: "heatmap" | "points",
   minLat?: number,
   maxLat?: number,
   minLng?: number,
@@ -28,7 +63,7 @@ function buildCacheKey(
     .update(JSON.stringify({ district, category, from, to }))
     .digest("hex")
     .slice(0, 8);
-  return `meldungen:${zoom}:${bbox}:${filterHash}`;
+  return `meldungen:${displayMode}:${zoom}:${bbox}:${filterHash}`;
 }
 
 function buildWhereClause(parameters: {
@@ -51,12 +86,11 @@ function buildWhereClause(parameters: {
     parameters.minLng !== undefined &&
     parameters.maxLng !== undefined
   ) {
+    const envelope = `ST_MakeEnvelope($${index}, $${index + 1}, $${index + 2}, $${index + 3}, 4326)`;
     conditions.push(
-      `ST_Within(
-        location::geometry,
-        ST_MakeEnvelope($${index}, $${index + 1}, $${index + 2}, $${index + 3}, 4326)
-      )`,
+      `location::geometry && ${envelope}`,
     );
+    conditions.push(`ST_Intersects(location::geometry, ${envelope})`);
     values.push(parameters.minLng, parameters.minLat, parameters.maxLng, parameters.maxLat);
     index += 4;
   }
@@ -97,10 +131,12 @@ router.get("/", async (request, res, next) => {
       return;
     }
 
-    const { zoom, minLat, maxLat, minLng, maxLng, district, category, from, to } = parsed.data;
+    const { zoom, displayMode, minLat, maxLat, minLng, maxLng, district, category, from, to } =
+      parsed.data;
 
     const cacheKey = buildCacheKey(
       zoom,
+      displayMode,
       minLat,
       maxLat,
       minLng,
@@ -129,12 +165,28 @@ router.get("/", async (request, res, next) => {
     });
 
     let result;
-    let type: "clustered" | "raw";
+    let type: "clustered" | "heat" | "raw";
+    const usePreAggregatedTotals = !district && !category && !from && !to;
 
     const [bubbleMin, bubbleMax] = ZOOM_BREAKPOINTS.BUBBLE;
     const [heatMin, heatMax] = ZOOM_BREAKPOINTS.HEAT;
 
-    if (zoom >= bubbleMin && zoom <= bubbleMax) {
+    if (displayMode === "heatmap") {
+      const gridSize = getHeatGridSize(zoom, minLat, maxLat, minLng, maxLng);
+      const q = await pool.query(
+        `SELECT
+           ST_Y(ST_Centroid(ST_Collect(location::geometry)))::float AS lat,
+           ST_X(ST_Centroid(ST_Collect(location::geometry)))::float AS lng,
+           COUNT(*)::int                                             AS count
+         FROM meldungen
+         ${clause}
+         GROUP BY ST_SnapToGrid(location::geometry, $${values.length + 1})
+         ORDER BY count DESC`,
+        [...values, gridSize],
+      );
+      result = q.rows;
+      type = "heat";
+    } else if (zoom >= bubbleMin && zoom <= bubbleMax && usePreAggregatedTotals) {
       // Zoom 9-11: use stats_totals materialized view with bbox filter
       const bboxConditions: string[] = [];
       const bboxValues: unknown[] = [];
@@ -179,9 +231,9 @@ router.get("/", async (request, res, next) => {
       );
       result = q.rows;
       type = "clustered";
-    } else if (zoom >= heatMin && zoom <= heatMax) {
-      // Zoom 12-14: on-the-fly grid clustering
-      const gridSize = 0.01;
+    } else if ((zoom >= bubbleMin && zoom <= bubbleMax) || (zoom >= heatMin && zoom <= heatMax)) {
+      // Filtered low zoom and all mid zooms: real spatial clustering, finer as you zoom in
+      const gridSize = getClusterGridSize(zoom);
       const q = await pool.query(
         `SELECT
            ST_Y(ST_Centroid(ST_Collect(location::geometry)))::float AS lat,
@@ -198,6 +250,14 @@ router.get("/", async (request, res, next) => {
       type = "clustered";
     } else {
       // Zoom 15-18: raw pins
+      const centerLng =
+        minLng !== undefined && maxLng !== undefined ? (minLng + maxLng) / 2 : undefined;
+      const centerLat =
+        minLat !== undefined && maxLat !== undefined ? (minLat + maxLat) / 2 : undefined;
+      const hasViewportCenter = centerLng !== undefined && centerLat !== undefined;
+      const orderClause = hasViewportCenter
+        ? `ORDER BY location::geometry <-> ST_SetSRID(ST_MakePoint($${values.length + 1}, $${values.length + 2}), 4326), date DESC`
+        : "ORDER BY date DESC";
       const q = await pool.query(
         `SELECT
            id,
@@ -214,9 +274,9 @@ router.get("/", async (request, res, next) => {
            report_number
          FROM meldungen
          ${clause}
-         ORDER BY date DESC
-         LIMIT 1000`,
-        values,
+         ${orderClause}
+         LIMIT 1500`,
+        hasViewportCenter ? [...values, centerLng, centerLat] : values,
       );
       result = q.rows;
       type = "raw";

@@ -1,8 +1,7 @@
 import React from "react";
-import type { StatsOverview, StatCategory } from "@ordnungsamt/shared";
+import type { MapDisplayMode, StatsOverview, StatCategory } from "@ordnungsamt/shared";
 import { StatsGrid } from "./StatsGrid";
 import { LayerControls } from "./LayerControls";
-import { Sliders } from "./Sliders";
 import { DistrictFilter } from "./DistrictFilter";
 import { CategoryList } from "./CategoryList";
 
@@ -11,16 +10,10 @@ interface SidebarProps {
   overview: StatsOverview | null;
   categories: StatCategory[];
   statsLoading: boolean;
-  heatVisible: boolean;
-  pointsVisible: boolean;
-  radius: number;
-  blur: number;
+  displayMode: MapDisplayMode;
   district: string | undefined;
   category: string | undefined;
-  onHeatChange: (v: boolean) => void;
-  onPointsChange: (v: boolean) => void;
-  onRadiusChange: (v: number) => void;
-  onBlurChange: (v: number) => void;
+  onDisplayModeChange: (mode: MapDisplayMode) => void;
   onDistrictChange: (v: string | undefined) => void;
   onCategoryChange: (v: string | undefined) => void;
 }
@@ -44,16 +37,10 @@ export function Sidebar({
   overview,
   categories,
   statsLoading,
-  heatVisible,
-  pointsVisible,
-  radius,
-  blur,
+  displayMode,
   district,
   category,
-  onHeatChange,
-  onPointsChange,
-  onRadiusChange,
-  onBlurChange,
+  onDisplayModeChange,
   onDistrictChange,
   onCategoryChange,
 }: SidebarProps) {
@@ -76,23 +63,10 @@ export function Sidebar({
 
       {/* Layer controls */}
       <div style={sectionStyle}>
-        <div style={labelStyle}>Ebenen</div>
+        <div style={labelStyle}>Darstellung</div>
         <LayerControls
-          heatVisible={heatVisible}
-          pointsVisible={pointsVisible}
-          onHeatChange={onHeatChange}
-          onPointsChange={onPointsChange}
-        />
-      </div>
-
-      {/* Sliders */}
-      <div style={sectionStyle}>
-        <div style={labelStyle}>Heatmap</div>
-        <Sliders
-          radius={radius}
-          blur={blur}
-          onRadiusChange={onRadiusChange}
-          onBlurChange={onBlurChange}
+          displayMode={displayMode}
+          onModeChange={onDisplayModeChange}
         />
       </div>
 

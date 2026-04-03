@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { Header } from "./components/Header";
 import { Sidebar } from "./components/Sidebar";
 import { Map } from "./components/Map";
@@ -21,9 +21,9 @@ export default function App() {
 
   return (
     <>
-      <Header 
-        total={stats.overview?.total ?? null} 
-        loading={stats.loading} 
+      <Header
+        total={stats.overview?.total ?? null}
+        loading={stats.loading}
         onToggleSidebar={() => prefs.setSidebarOpen(!prefs.sidebarOpen)}
         sidebarOpen={prefs.sidebarOpen}
       />
@@ -33,25 +33,16 @@ export default function App() {
           overview={stats.overview}
           categories={stats.categories}
           statsLoading={stats.loading}
-          heatVisible={prefs.heatVisible}
-          pointsVisible={prefs.pointsVisible}
-          radius={prefs.radius}
-          blur={prefs.blur}
+          displayMode={prefs.displayMode}
           district={prefs.district}
           category={prefs.category}
-          onHeatChange={prefs.setHeatVisible}
-          onPointsChange={prefs.setPointsVisible}
-          onRadiusChange={prefs.setRadius}
-          onBlurChange={prefs.setBlur}
+          onDisplayModeChange={prefs.setDisplayMode}
           onDistrictChange={prefs.setDistrict}
           onCategoryChange={prefs.setCategory}
         />
         <Map
           filters={filters}
-          heatVisible={prefs.heatVisible}
-          pointsVisible={prefs.pointsVisible}
-          radius={prefs.radius}
-          blur={prefs.blur}
+          displayMode={prefs.displayMode}
           initialLat={prefs.mapLat}
           initialLng={prefs.mapLng}
           initialZoom={prefs.mapZoom}

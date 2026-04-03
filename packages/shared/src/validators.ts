@@ -36,7 +36,8 @@ export const OAResponseSchema = z.object({
 });
 
 export const MapQuerySchema = z.object({
-  zoom: z.coerce.number().int().min(1).max(18),
+  zoom: z.coerce.number().int().min(1),
+  displayMode: z.enum(["heatmap", "points"]).default("points"),
   minLat: z.coerce.number().optional(),
   maxLat: z.coerce.number().optional(),
   minLng: z.coerce.number().optional(),

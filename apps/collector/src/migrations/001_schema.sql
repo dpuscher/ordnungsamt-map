@@ -26,6 +26,8 @@ CREATE TABLE IF NOT EXISTS meldungen (
 -- Spatial index for viewport queries
 CREATE INDEX IF NOT EXISTS meldungen_location_idx
   ON meldungen USING GIST(location);
+CREATE INDEX IF NOT EXISTS meldungen_location_geometry_idx
+  ON meldungen USING GIST((location::geometry));
 
 -- Compound index for filter queries
 CREATE INDEX IF NOT EXISTS meldungen_filter_idx

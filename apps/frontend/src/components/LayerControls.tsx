@@ -1,88 +1,55 @@
-import React from "react";
-import * as Switch from "@radix-ui/react-switch";
+import type { MapDisplayMode } from "@ordnungsamt/shared";
 
 interface LayerControlsProps {
-  heatVisible: boolean;
-  pointsVisible: boolean;
-  onHeatChange: (v: boolean) => void;
-  onPointsChange: (v: boolean) => void;
+  displayMode: MapDisplayMode;
+  onModeChange: (mode: MapDisplayMode) => void;
 }
 
-interface LayerRowProps {
+function ModeButton({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
   label: string;
-  checked: boolean;
-  onCheckedChange: (v: boolean) => void;
-  id: string;
-}
-
-function LayerRow({ label, checked, onCheckedChange, id }: LayerRowProps) {
+  onClick: () => void;
+}) {
   return (
-    <div
+    <button
+      type="button"
+      onClick={onClick}
       style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "8px 0",
+        flex: 1,
+        border: "1px solid var(--color-border)",
+        background: active ? "var(--color-accent)" : "rgba(255,255,255,0.02)",
+        color: active ? "#0a0c10" : "var(--color-text)",
+        fontFamily: "var(--font-mono)",
+        fontSize: 11,
+        letterSpacing: 1,
+        textTransform: "uppercase",
+        padding: "10px 12px",
+        cursor: "pointer",
+        transition: "background 0.2s ease, color 0.2s ease, border-color 0.2s ease",
       }}
     >
-      <label htmlFor={id} style={{ fontSize: 13, color: "var(--color-text)", cursor: "pointer" }}>
-        {label}
-      </label>
-      <Switch.Root
-        id={id}
-        checked={checked}
-        onCheckedChange={onCheckedChange}
-        style={{
-          width: 36,
-          height: 20,
-          background: checked ? "var(--color-accent)" : "var(--color-border)",
-          borderRadius: 10,
-          cursor: "pointer",
-          position: "relative",
-          border: "none",
-          outline: "none",
-          transition: "background 0.2s",
-          flexShrink: 0,
-        }}
-      >
-        <Switch.Thumb
-          style={{
-            display: "block",
-            width: 14,
-            height: 14,
-            background: "#fff",
-            borderRadius: "50%",
-            position: "absolute",
-            top: 3,
-            left: checked ? 19 : 3,
-            transition: "left 0.2s",
-          }}
-        />
-      </Switch.Root>
-    </div>
+      {label}
+    </button>
   );
 }
 
-export function LayerControls({
-  heatVisible,
-  pointsVisible,
-  onHeatChange,
-  onPointsChange,
-}: LayerControlsProps) {
+export function LayerControls({ displayMode, onModeChange }: LayerControlsProps) {
   return (
-    <div>
-      <LayerRow
-        id="heat-toggle"
-        label="Heatmap"
-        checked={heatVisible}
-        onCheckedChange={onHeatChange}
-      />
-      <LayerRow
-        id="points-toggle"
-        label="Einzelpunkte"
-        checked={pointsVisible}
-        onCheckedChange={onPointsChange}
-      />
-    </div>
+      <div style={{ display: "flex", gap: 8 }}>
+        <ModeButton
+          label="Heatmap"
+          active={displayMode === "heatmap"}
+          onClick={() => onModeChange("heatmap")}
+        />
+        <ModeButton
+          label="Punkte"
+          active={displayMode === "points"}
+          onClick={() => onModeChange("points")}
+        />
+      </div>
   );
 }

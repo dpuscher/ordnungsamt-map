@@ -28,6 +28,12 @@ export interface ClusteredPoint {
   primary_category: string;
 }
 
+export interface HeatPoint {
+  lat: number;
+  lng: number;
+  count: number;
+}
+
 export interface RawPoint {
   id: string;
   lat: number;
@@ -43,7 +49,9 @@ export interface RawPoint {
   report_number: string | null;
 }
 
-export type ApiResponseType = "clustered" | "raw";
+export type MapDisplayMode = "heatmap" | "points";
+
+export type ApiResponseType = "clustered" | "heat" | "raw";
 
 export interface ApiResponse<T> {
   type: ApiResponseType;

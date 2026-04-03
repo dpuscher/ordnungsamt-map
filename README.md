@@ -8,15 +8,14 @@ An interactive heatmap that visualizes citizen reports filed with Berlin's Ordnu
 
 ## Features
 
-- **Three visualization modes** that adapt to zoom level:
-  - **Bubble clusters** (city/district view) — pre-aggregated counts per location
-  - **Heatmap** (neighborhood view) — density visualization with adjustable radius and blur
-  - **Individual pins** (street view) — raw reports with popup details
+- **Two display modes**:
+  - **Heatmap** — density visualization that stays active across all zoom levels with a fixed default style
+  - **Points** — bubble clusters at low zoom, raw report pins at street zoom
 - **Filter by district** (all 12 Berlin boroughs) and **category** (30 issue types)
 - **Statistics sidebar** with overview counts, daily trend chart, and category/district breakdowns
 - **Dark CartoDB map** theme optimized for data visibility
 - **Redis caching** and PostGIS spatial queries for fast map tile responses
-- UI preferences (map position, filters, layer visibility) persist in `localStorage`
+- UI preferences (map position, filters, display mode) persist in `localStorage`
 
 ---
 
@@ -162,16 +161,21 @@ Query parameters:
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `zoom` | number | Map zoom level (9–18); determines clustering strategy |
+| `zoom` | number | Map zoom level; determines clustering strategy |
+| `displayMode` | string | `heatmap` or `points`; controls the response shape |
 | `minLat`, `maxLat` | number | Latitude bounds of the viewport |
 | `minLng`, `maxLng` | number | Longitude bounds of the viewport |
 | `district` | string | Filter by Berlin district (optional) |
 | `category` | string | Filter by issue category (optional) |
 
-Response varies by zoom:
-- **Zoom 9–11**: Bubble clusters (pre-aggregated `{lat, lng, count}`)
-- **Zoom 12–14**: Heatmap grid points
-- **Zoom 15–18**: Raw report pins with popup data (max 1000)
+Response varies by `displayMode` and zoom:
+- **`displayMode=heatmap`**
+  - Zoom 9–11: aggregated heat points from `stats_totals`
+  - Zoom 12–19: grid-clustered heat points tuned by zoom level
+- **`displayMode=points`**
+  - Zoom 9–12: bubble clusters
+  - Zoom 13–15: finer clustered neighborhood points
+  - Zoom 16–19: raw report pins with popup data (max 1000)
 
 ```
 GET /api/meldungen/:id
