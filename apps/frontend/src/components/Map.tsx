@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback } from "react";
+import escapeHtml from "escape-html";
 import L from "leaflet";
 import type { Map as LeafletMap, CircleMarker } from "leaflet";
 import type { ApiResponse, ClusteredPoint, RawPoint, MapFilters } from "@ordnungsamt/shared";
@@ -61,6 +62,9 @@ export function Map({
 
   const { data, fetchData } = useMapData();
 
+  const triggerFetchRef = useRef<((map: LeafletMap) => void) | null>(null);
+  const onPositionChangeRef = useRef(onPositionChange);
+
   const loadHeatPlugin = useCallback(async () => {
     if (typeof (L as unknown as { heatLayer?: unknown }).heatLayer === "function") return;
     await import("leaflet.heat" as never);
@@ -84,6 +88,15 @@ export function Map({
     [fetchData, filters],
   );
 
+  // Keep refs up to date so event handlers registered once always call the current version
+  useEffect(() => {
+    triggerFetchRef.current = triggerFetch;
+  }, [triggerFetch]);
+
+  useEffect(() => {
+    onPositionChangeRef.current = onPositionChange;
+  }, [onPositionChange]);
+
   // Initialize map
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -106,12 +119,12 @@ export function Map({
 
     map.on("moveend", () => {
       const center = map.getCenter();
-      onPositionChange(center.lat, center.lng, map.getZoom());
-      void triggerFetch(map);
+      onPositionChangeRef.current(center.lat, center.lng, map.getZoom());
+      triggerFetchRef.current?.(map);
     });
 
     mapRef.current = map;
-    void triggerFetch(map);
+    triggerFetchRef.current?.(map);
 
     return () => {
       map.remove();
@@ -165,7 +178,7 @@ export function Map({
         });
         marker.bindPopup(
           `<div style="font-family:'DM Mono',monospace">
-            <div style="color:#e8ff3c;font-size:11px;margin-bottom:4px">${point.primary_category}</div>
+            <div style="color:#e8ff3c;font-size:11px;margin-bottom:4px">${escapeHtml(point.primary_category)}</div>
             <div style="font-size:12px;color:#e2e4e8">${point.count.toLocaleString("de-DE")} Meldungen</div>
           </div>`,
         );
@@ -218,15 +231,22 @@ export function Map({
         const postalLine = point.postal_code
           ? `<div style="font-size:11px;color:#5a5f6e;margin-bottom:4px">${point.postal_code} ${point.district}</div>`
           : `<div style="font-size:11px;color:#5a5f6e;margin-bottom:4px">${point.district}</div>`;
+
+        const descriptionLine = point.description
+          ? `<div style="font-size:11px;color:#94a3b8;margin-top:8px;padding-top:8px;border-top:1px solid #2d3139;max-height:100px;overflow-y:auto;white-space:pre-wrap">${escapeHtml(point.description)}</div>`
+          : "";
+
         marker.bindPopup(
-          `<div style="font-family:'DM Mono',monospace;min-width:200px">
+          `<div style="font-family:'DM Mono',monospace;min-width:200px;max-width:300px">
             <div style="color:#e8ff3c;font-size:11px;margin-bottom:6px;letter-spacing:1px">${point.category}</div>
             ${addressLine}
             ${postalLine}
             <div style="font-size:11px;color:#5a5f6e">${dateStr}</div>
             <div style="font-size:11px;color:#5a5f6e;margin-top:2px">Status: ${point.status}</div>
+            ${descriptionLine}
           </div>`,
         );
+
         const m = marker.addTo(map);
         markersRef.current.push(m);
       }
@@ -262,3 +282,4 @@ export function Map({
     </div>
   );
 }
+

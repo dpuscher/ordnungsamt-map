@@ -36,6 +36,7 @@ export interface RawPoint {
   date: string;
   district: string;
   status: string;
+  description: string | null;
   street: string | null;
   house_number: string | null;
   postal_code: string | null;

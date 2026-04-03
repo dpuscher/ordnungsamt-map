@@ -581,10 +581,12 @@ __metadata:
     "@radix-ui/react-slider": "npm:^1.3.6"
     "@radix-ui/react-switch": "npm:^1.2.6"
     "@tailwindcss/vite": "npm:^4.2.2"
+    "@types/escape-html": "npm:^1.0.4"
     "@types/leaflet": "npm:^1.9.21"
     "@types/react": "npm:^19.2.14"
     "@types/react-dom": "npm:^19.2.3"
     "@vitejs/plugin-react": "npm:^6.0.1"
+    escape-html: "npm:^1.0.3"
     leaflet: "npm:^1.9.4"
     leaflet.heat: "npm:^0.2.0"
     react: "npm:^19.2.4"
@@ -1264,6 +1266,13 @@ __metadata:
   dependencies:
     "@types/node": "npm:*"
   checksum: 10c0/b5dd407040db7d8aa1bd36e79e5f3f32292f6b075abc287529e9f48df1a25fda3e3799ba30b4656667ffb931d3b75690c1d6ca71e39f7337ea6dfda8581916d0
+  languageName: node
+  linkType: hard
+
+"@types/escape-html@npm:^1.0.4":
+  version: 1.0.4
+  resolution: "@types/escape-html@npm:1.0.4"
+  checksum: 10c0/5cdae9d38e97b1ad61180528ef7ca66bf6be96e875cc560c3e064d6ca75ccf2adaf2fa3b7bdd4f7494013e4357a2fb0bb62f2e59ca53097d5c45c7519d0ce9c3
   languageName: node
   linkType: hard
 

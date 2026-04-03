@@ -207,6 +207,7 @@ router.get("/", async (request, res, next) => {
            date,
            district,
            status,
+           description,
            street,
            house_number,
            postal_code,
