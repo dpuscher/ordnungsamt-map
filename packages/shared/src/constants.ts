@@ -163,8 +163,8 @@ export const CATEGORY_COLORS: Record<string, string> = {
 
 export const ZOOM_BREAKPOINTS = {
   BUBBLE: [9, 12] as [number, number],
-  HEAT: [13, 15] as [number, number],
-  PINS: [16, 18] as [number, number],
+  HEAT: [13, 16] as [number, number],
+  PINS: [17, 18] as [number, number],
 };
 
 export const OA_API_URL =

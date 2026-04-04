@@ -43,29 +43,33 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 function getHeatLayerOptions(zoom: number): L.HeatLayerOptions {
-  const [bubbleMin] = ZOOM_BREAKPOINTS.BUBBLE;
-  const zoomProgress = clamp((zoom - bubbleMin) / (18 - bubbleMin), 0, 1);
-  let radius = 24;
-  let blur = 18;
+  let radius: number;
+  let blur: number;
 
-  if (zoom >= 12 && zoom <= 13) {
-    radius = 15;
-    blur = 11;
-  } else if (zoom >= 14 && zoom <= 15) {
-    radius = 15;
-    blur = 11;
-  } else if (zoom >= 16) {
-    radius = 13;
-    blur = 10;
+  if (zoom <= 10) {
+    radius = 32;
+    blur = 24;
+  } else if (zoom <= 12) {
+    radius = 24;
+    blur = 18;
+  } else if (zoom <= 13) {
+    radius = 20;
+    blur = 15;
+  } else if (zoom <= 15) {
+    radius = 22;
+    blur = 16;
+  } else {
+    radius = 18;
+    blur = 14;
   }
 
   return {
     radius,
     blur,
     gradient: HEAT_GRADIENT,
-    minOpacity: 0.08 + (1 - zoomProgress) * 0.05,
+    minOpacity: 0.4,
     maxZoom: 19,
-    max: 1,
+    max: 0.5,
   };
 }
 
@@ -92,33 +96,54 @@ function safeInvalidateSize(map: LeafletMap): void {
 function getClusterMarkerStyle(zoom: number, count: number, maxCount: number): L.CircleMarkerOptions {
   const [bubbleMin, bubbleMax] = ZOOM_BREAKPOINTS.BUBBLE;
   const isLowZoom = zoom >= bubbleMin && zoom <= bubbleMax;
-  const normalized = count / Math.max(maxCount, 1);
+
+  // Log normalization gives much better visual distribution when counts vary widely
+  const logCount = Math.log1p(count);
+  const logMax = Math.log1p(Math.max(maxCount, 1));
+  const normalized = logMax > 0 ? logCount / logMax : 0.5;
 
   if (isLowZoom) {
+    // Shrink max radius as zoom increases — at zoom 9 each bubble covers a large area,
+    // at zoom 12 the grid is fine enough that large radii cause heavy overlap
+    const maxRadius = zoom <= 9 ? 30 : zoom <= 10 ? 24 : zoom <= 11 ? 17 : 11;
     return {
-      radius: 7 + normalized * 28,
-      fillOpacity: 0.52,
+      radius: 4 + normalized * maxRadius,
+      fillOpacity: 0.45 + normalized * 0.3,
       stroke: true,
       weight: 1,
-      opacity: 0.8,
+      opacity: 0.85,
     };
   }
 
   return {
-    radius: 4 + normalized * 10,
-    fillOpacity: 0.42,
+    radius: 3 + normalized * 13,
+    fillOpacity: 0.3 + normalized * 0.35,
     stroke: true,
     weight: 1,
-    opacity: 0.7,
+    opacity: 0.75,
   };
+}
+
+// Greedy spatial sampling: keeps the highest-count cluster per geographic cell,
+// giving an even spread across the map rather than piling everything into the densest area.
+// Input must be sorted by count DESC (backend guarantees this).
+function spatialSample(points: ClusteredPoint[], maxCount: number, minSep: number): ClusteredPoint[] {
+  if (points.length <= maxCount) return points;
+  const selected: ClusteredPoint[] = [];
+  for (const point of points) {
+    if (selected.some(s => Math.abs(s.lat - point.lat) < minSep && Math.abs(s.lng - point.lng) < minSep)) continue;
+    selected.push(point);
+    if (selected.length >= maxCount) break;
+  }
+  return selected;
 }
 
 function getFetchPadding(displayMode: MapDisplayMode, zoom: number): number {
   if (displayMode === "points") {
-    if (zoom >= 19) return 0.18;
-    if (zoom >= 18) return 0.28;
-    if (zoom >= 16) return 0.35;
-    return 0.18;
+    // Raw pins only at zoom 17+: fetch just the visible viewport (tiny pad to avoid edge gaps)
+    if (zoom >= 17) return 0.05;
+    if (zoom >= 13) return 0.18;
+    return 0.1;
   }
 
   if (zoom >= 16) return 0.28;
@@ -135,58 +160,26 @@ function normalizeHouseNumber(houseNumber: string | null): string | null {
   return trimmed;
 }
 
-function getQuantile(values: number[], quantile: number): number {
-  if (values.length === 0) return 0;
-
-  const sorted = [...values].sort((a, b) => a - b);
-  const index = (sorted.length - 1) * quantile;
-  const lower = Math.floor(index);
-  const upper = Math.ceil(index);
-
-  if (lower === upper) return sorted[lower] ?? 0;
-
-  const lowerValue = sorted[lower] ?? 0;
-  const upperValue = sorted[upper] ?? lowerValue;
-  const t = index - lower;
-  return lowerValue + (upperValue - lowerValue) * t;
-}
 
 function filterHeatPointsForZoom(
   points: [number, number, number][],
-  zoom: number,
+  _zoom: number,
 ): [number, number, number][] {
-  if (points.length === 0 || zoom >= 14) return points;
-
-  const weights = points.map(([, , weight]) => weight);
-  const quantile = zoom <= 11 ? 0.78 : 0.62;
-  const threshold = getQuantile(weights, quantile);
-  const minimumWeight = zoom <= 11 ? 0.22 : 0.14;
-  const filtered = points.filter(([, , weight]) => weight >= Math.max(threshold, minimumWeight));
-
-  if (filtered.length >= 24) return filtered;
-
-  return [...points]
-    .sort((a, b) => b[2] - a[2])
-    .slice(0, Math.min(points.length, zoom <= 11 ? 40 : 80));
+  return points;
 }
 
 function toViewportRelativeWeight(count: number, counts: number[]): number {
-  if (counts.length <= 1) return 0.75;
+  if (counts.length <= 1) return 0.6;
 
-  const minCount = Math.min(...counts);
-  const maxCount = Math.max(...counts);
+  const logCounts = counts.map(c => Math.log1p(c));
+  const logCount = Math.log1p(count);
+  const minLog = Math.min(...logCounts);
+  const maxLog = Math.max(...logCounts);
 
-  if (maxCount === minCount) {
-    const absoluteWeight = 0.18 + (Math.log1p(Math.max(count, 1)) / Math.log(6)) * 0.18;
-    return clamp(absoluteWeight, 0.24, 0.42);
-  }
+  if (maxLog === minLog) return 0.5;
 
-  const floor = getQuantile(counts, 0.35);
-  const ceiling = Math.max(getQuantile(counts, 0.9), floor + 1);
-  const normalized = clamp((count - floor) / (ceiling - floor), 0, 1);
-  const emphasized = normalized ** 1.4;
-
-  return 0.04 + emphasized * 0.96;
+  const normalized = clamp((logCount - minLog) / (maxLog - minLog), 0, 1);
+  return 0.1 + normalized * 0.9;
 }
 
 function toHeatPoints(
@@ -442,9 +435,30 @@ export function Map({
     } else if (data.type === "clustered") {
       // Aggregated point mode: large bubbles at low zoom, tighter clusters in the middle range
       const clustered = data as ApiResponse<ClusteredPoint>;
-      const maxCount = Math.max(...clustered.data.map(p => p.count), 1);
+      const [bubbleMin, bubbleMax] = ZOOM_BREAKPOINTS.BUBBLE;
+      const isLowZoom = zoom >= bubbleMin && zoom <= bubbleMax;
 
-      for (const point of clustered.data) {
+      // At mid-zoom the grid is fine enough that singletons create unreadable clutter — skip them
+      const minCount = isLowZoom ? 1 : 2;
+      const filtered = clustered.data.filter(p => p.count >= minCount);
+
+      // Spatially sample at all zoom levels in points mode to prevent overlap.
+      // minSep ≥ 2 × maxRadius × degrees_per_pixel ensures circles don't visually touch.
+      // Backend data is sorted by count DESC so the most significant clusters are kept first.
+      const visible = isLowZoom
+        ? spatialSample(
+            filtered,
+            zoom <= 9 ? 30 : zoom <= 10 ? 50 : zoom <= 11 ? 70 : 100,
+            zoom <= 9 ? 0.14 : zoom <= 10 ? 0.065 : zoom <= 11 ? 0.022 : 0.010,
+          )
+        : spatialSample(
+            filtered,
+            zoom <= 13 ? 200 : zoom <= 14 ? 350 : zoom <= 15 ? 500 : 800,
+            zoom <= 13 ? 0.005 : zoom <= 14 ? 0.003 : zoom <= 15 ? 0.0015 : 0.0008,
+          );
+      const maxCount = Math.max(...visible.map(p => p.count), 1);
+
+      for (const point of visible) {
         const color = CATEGORY_COLORS[point.primary_category] ?? "#94a3b8";
         const markerStyle = getClusterMarkerStyle(zoom, point.count, maxCount);
         const marker = L.circleMarker([point.lat, point.lng], {
@@ -470,12 +484,13 @@ export function Map({
       for (const point of raw.data) {
         const color = CATEGORY_COLORS[point.category] ?? "#94a3b8";
         const marker = L.circleMarker([point.lat, point.lng], {
-          radius: 5,
+          radius: 4,
           fillColor: color,
-          fillOpacity: 0.8,
+          fillOpacity: 0.7,
           stroke: true,
           color: color,
           weight: 1,
+          opacity: 0.8,
         });
         const dateStr = new Date(point.date).toLocaleString("de-DE", {
           dateStyle: "short",

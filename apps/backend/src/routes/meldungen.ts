@@ -250,14 +250,6 @@ router.get("/", async (request, res, next) => {
       type = "clustered";
     } else {
       // Zoom 15-18: raw pins
-      const centerLng =
-        minLng !== undefined && maxLng !== undefined ? (minLng + maxLng) / 2 : undefined;
-      const centerLat =
-        minLat !== undefined && maxLat !== undefined ? (minLat + maxLat) / 2 : undefined;
-      const hasViewportCenter = centerLng !== undefined && centerLat !== undefined;
-      const orderClause = hasViewportCenter
-        ? `ORDER BY location::geometry <-> ST_SetSRID(ST_MakePoint($${values.length + 1}, $${values.length + 2}), 4326), date DESC`
-        : "ORDER BY date DESC";
       const q = await pool.query(
         `SELECT
            id,
@@ -274,9 +266,9 @@ router.get("/", async (request, res, next) => {
            report_number
          FROM meldungen
          ${clause}
-         ${orderClause}
-         LIMIT 1500`,
-        hasViewportCenter ? [...values, centerLng, centerLat] : values,
+         ORDER BY date DESC
+         LIMIT 2500`,
+        values,
       );
       result = q.rows;
       type = "raw";
