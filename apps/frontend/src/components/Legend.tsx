@@ -2,49 +2,15 @@ import React from "react";
 
 export function Legend() {
   return (
-    <div
-      style={{
-        position: "absolute",
-        bottom: 20,
-        right: 20,
-        zIndex: 1000,
-        background: "rgba(13,16,24,0.95)",
-        border: "1px solid var(--color-border)",
-        borderLeft: "2px solid var(--color-accent)",
-        padding: "12px 14px",
-        backdropFilter: "blur(12px)",
-      }}
-    >
-      <div
-        style={{
-          fontFamily: "var(--font-mono)",
-          fontSize: 8,
-          letterSpacing: 2,
-          color: "var(--color-muted)",
-          textTransform: "uppercase",
-          marginBottom: 8,
-        }}
-      >
+    <div className="absolute bottom-5 right-5 z-[1000] bg-bg/[0.95] border border-border border-l-[2px] border-l-accent p-3 px-[14px] backdrop-blur-md">
+      <div className="font-mono text-[8px] tracking-[2px] text-muted uppercase mb-2">
         Intensität
       </div>
       <div
-        style={{
-          width: 140,
-          height: 6,
-          background: "linear-gradient(to right, #00d4ff, #e8ff3c, #ff4c38)",
-          marginBottom: 5,
-        }}
+        className="w-[140px] h-[6px] mb-[5px]"
+        style={{ background: "linear-gradient(to right, #00d4ff, #e8ff3c, #ff4c38)" }}
       />
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          fontFamily: "var(--font-mono)",
-          fontSize: 8,
-          color: "var(--color-muted)",
-          letterSpacing: 0.5,
-        }}
-      >
+      <div className="flex justify-between font-mono text-[8px] text-muted tracking-[0.5px]">
         <span>Niedrig</span>
         <span>Mittel</span>
         <span>Hoch</span>

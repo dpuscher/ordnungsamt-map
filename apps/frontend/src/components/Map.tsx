@@ -529,8 +529,8 @@ export function Map({
   }, [data]);
 
   return (
-    <div style={{ flex: 1, position: "relative" }}>
-      <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
+    <div className="flex-1 relative">
+      <div ref={containerRef} className="w-full h-full" />
       {displayMode === "heatmap" ? <Legend /> : null}
     </div>
   );

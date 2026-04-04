@@ -1,5 +1,19 @@
 import React from "react";
+import { cva } from "class-variance-authority";
+import { cn } from "../lib/utils";
 import { DISTRICTS } from "@ordnungsamt/shared";
+
+const districtButtonVariants = cva(
+  "font-sans font-medium text-[11px] py-2 px-[10px] border-none border-l-2 cursor-pointer transition-all duration-150 text-left leading-tight bg-bg",
+  {
+    variants: {
+      active: {
+        true: "bg-accent/[0.08] border-l-accent text-accent",
+        false: "border-l-transparent text-muted hover:text-text hover:bg-white/[0.03]",
+      },
+    },
+  },
+);
 
 interface DistrictFilterProps {
   active: string | undefined;
@@ -8,48 +22,14 @@ interface DistrictFilterProps {
 
 export function DistrictFilter({ active, onChange }: DistrictFilterProps) {
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        gap: 1,
-        background: "var(--color-border)",
-      }}
-    >
+    <div className="grid grid-cols-2 gap-px bg-border">
       {DISTRICTS.map(district => {
         const isActive = active === district;
         return (
           <button
             key={district}
             onClick={() => onChange(isActive ? undefined : district)}
-            style={{
-              background: isActive ? "rgba(232,255,60,0.08)" : "var(--color-bg)",
-              border: "none",
-              borderLeft: isActive ? "2px solid var(--color-accent)" : "2px solid transparent",
-              color: isActive ? "var(--color-accent)" : "var(--color-muted)",
-              fontFamily: "var(--font-sans)",
-              fontWeight: 500,
-              fontSize: 11,
-              padding: "8px 10px",
-              cursor: "pointer",
-              transition: "all 0.15s",
-              textAlign: "left",
-              lineHeight: 1.2,
-            }}
-            onMouseEnter={e => {
-              if (!isActive) {
-                const el = e.currentTarget as HTMLButtonElement;
-                el.style.color = "var(--color-text)";
-                el.style.background = "rgba(255,255,255,0.03)";
-              }
-            }}
-            onMouseLeave={e => {
-              if (!isActive) {
-                const el = e.currentTarget as HTMLButtonElement;
-                el.style.color = "var(--color-muted)";
-                el.style.background = "var(--color-bg)";
-              }
-            }}
+            className={cn(districtButtonVariants({ active: isActive }))}
           >
             {district}
           </button>

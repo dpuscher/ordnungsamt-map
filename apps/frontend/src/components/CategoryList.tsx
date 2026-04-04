@@ -1,4 +1,6 @@
 import React from "react";
+import { cva } from "class-variance-authority";
+import { cn } from "../lib/utils";
 import { CATEGORY_COLORS } from "@ordnungsamt/shared";
 import type { StatCategory } from "@ordnungsamt/shared";
 
@@ -8,109 +10,66 @@ interface CategoryListProps {
   onChange: (category: string | undefined) => void;
 }
 
+const rowVariants = cva("cursor-pointer transition-colors duration-150 border-l-[3px]", {
+  variants: {
+    active: {
+      true: "bg-accent/[0.04]",
+      false: "hover:bg-white/[0.02]",
+    },
+  },
+});
+
 export function CategoryList({ categories, active, onChange }: CategoryListProps) {
   const maxCount = Math.max(...categories.map(c => c.count), 1);
 
   return (
-    <div style={{ paddingBottom: 16 }}>
+    <div className="pb-4">
       {categories.map(cat => {
         const color = CATEGORY_COLORS[cat.category] ?? "#94a3b8";
         const isActive = active === cat.category;
         const barWidth = `${Math.round((cat.count / maxCount) * 100)}%`;
-        const pct = `${Math.round((cat.count / maxCount) * 100)}%`;
 
         return (
           <div
             key={cat.category}
             onClick={() => onChange(isActive ? undefined : cat.category)}
-            style={{
-              cursor: "pointer",
-              borderLeft: `3px solid ${isActive ? color : "transparent"}`,
-              background: isActive ? "rgba(232,255,60,0.04)" : "transparent",
-              transition: "background 0.15s, border-color 0.15s",
-            }}
-            onMouseEnter={e => {
-              if (!isActive) {
-                (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.02)";
-              }
-            }}
-            onMouseLeave={e => {
-              if (!isActive) {
-                (e.currentTarget as HTMLDivElement).style.background = "transparent";
-              }
-            }}
+            className={cn(rowVariants({ active: isActive }))}
+            style={{ borderLeftColor: isActive ? color : "transparent" }}
           >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "6px 14px 0 13px",
-              }}
-            >
+            <div className="flex items-center gap-2 pt-[6px] pb-0 pr-[14px] pl-[13px]">
               <div
-                style={{
-                  width: 6,
-                  height: 6,
-                  background: color,
-                  flexShrink: 0,
-                  opacity: isActive ? 1 : 0.6,
-                  transition: "opacity 0.15s",
-                }}
+                className="w-[6px] h-[6px] shrink-0 transition-opacity duration-150"
+                style={{ background: color, opacity: isActive ? 1 : 0.6 }}
               />
               <span
-                style={{
-                  fontSize: 12,
-                  fontWeight: isActive ? 600 : 400,
-                  color: isActive ? "var(--color-accent)" : "var(--color-text)",
-                  flex: 1,
-                  transition: "color 0.15s",
-                  lineHeight: 1.3,
-                }}
+                className={cn(
+                  "text-xs flex-1 transition-colors duration-150 leading-snug",
+                  isActive ? "text-accent font-semibold" : "text-text",
+                )}
               >
                 {cat.category}
               </span>
               <span
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 10,
-                  color: isActive ? "var(--color-accent)" : "var(--color-muted)",
-                  opacity: 0.8,
-                  transition: "color 0.15s",
-                  flexShrink: 0,
-                }}
+                className={cn(
+                  "font-mono text-[10px] shrink-0 transition-colors duration-150 opacity-80",
+                  isActive ? "text-accent" : "text-muted",
+                )}
               >
                 {cat.count.toLocaleString("de-DE")}
               </span>
             </div>
 
-            {/* Bar chart */}
-            <div
-              style={{
-                position: "relative",
-                height: 2,
-                background: "var(--color-border)",
-                margin: "5px 14px 0 16px",
-              }}
-            >
+            <div className="relative h-[2px] bg-border mx-[14px] ml-4 mt-[5px]">
               <div
-                style={{
-                  position: "absolute",
-                  height: "100%",
-                  width: barWidth,
-                  background: isActive ? color : color,
-                  opacity: isActive ? 0.9 : 0.4,
-                  transition: "width 0.5s ease, opacity 0.15s",
-                }}
+                className={cn(
+                  "absolute h-full transition-[width] duration-500",
+                  isActive ? "opacity-90" : "opacity-40",
+                )}
+                style={{ width: barWidth, background: color }}
               />
             </div>
 
-            <div
-              style={{
-                height: 6,
-                borderBottom: "1px solid var(--color-border)",
-              }}
-            />
+            <div className="h-[6px] border-b border-border" />
           </div>
         );
       })}

@@ -28,7 +28,7 @@ export default function App() {
         onToggleSidebar={() => prefs.setSidebarOpen(!prefs.sidebarOpen)}
         sidebarOpen={prefs.sidebarOpen}
       />
-      <div style={{ display: "flex", flex: 1, overflow: "hidden", position: "relative" }}>
+      <div className="flex flex-1 overflow-hidden relative">
         <Sidebar
           isOpen={prefs.sidebarOpen}
           overview={stats.overview}

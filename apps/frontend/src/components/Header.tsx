@@ -9,37 +9,13 @@ interface HeaderProps {
 
 export function Header({ total, loading, onToggleSidebar, sidebarOpen }: HeaderProps) {
   return (
-    <header
-      style={{
-        display: "flex",
-        alignItems: "center",
-        padding: "0 20px",
-        height: 52,
-        background: "var(--color-surface)",
-        borderBottom: "1px solid var(--color-border)",
-        flexShrink: 0,
-        zIndex: 1000,
-        position: "relative",
-        gap: 16,
-      }}
-    >
-      {/* Left accent bar */}
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          bottom: 0,
-          width: 2,
-          background: "var(--color-accent)",
-        }}
-      />
+    <header className="relative flex items-center gap-4 px-5 h-[52px] bg-surface border-b border-border shrink-0 z-[1000]">
+      <div className="absolute inset-y-0 left-0 w-[2px] bg-accent" />
 
       {onToggleSidebar && (
         <button
           onClick={onToggleSidebar}
-          className="flex md:hidden items-center justify-center p-0 bg-transparent border-none cursor-pointer"
-          style={{ color: "var(--color-accent)", flexShrink: 0 }}
+          className="flex md:hidden items-center justify-center p-0 bg-transparent border-none cursor-pointer text-accent"
           aria-label="Toggle Sidebar"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
@@ -58,96 +34,34 @@ export function Header({ total, loading, onToggleSidebar, sidebarOpen }: HeaderP
         </button>
       )}
 
-      <div style={{ display: "flex", alignItems: "baseline", gap: 0 }}>
-        <span
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: 20,
-            letterSpacing: 3,
-            color: "var(--color-accent)",
-            lineHeight: 1,
-          }}
-        >
+      <div className="flex items-baseline">
+        <span className="font-display text-xl tracking-[3px] text-accent leading-none">
           ORDNUNGSAMT
         </span>
-        <span
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 10,
-            color: "var(--color-muted)",
-            margin: "0 8px",
-            letterSpacing: 0,
-          }}
-        >
-          ·
-        </span>
-        <span
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: 20,
-            letterSpacing: 3,
-            color: "var(--color-text)",
-            opacity: 0.5,
-            lineHeight: 1,
-          }}
-        >
+        <span className="font-mono text-[10px] text-muted mx-2">·</span>
+        <span className="font-display text-xl tracking-[3px] text-text/50 leading-none">
           BERLIN
         </span>
       </div>
 
-      <div
-        style={{
-          fontFamily: "var(--font-mono)",
-          fontSize: 9,
-          color: "var(--color-muted)",
-          letterSpacing: 0.5,
-          display: "none",
-          alignItems: "center",
-          gap: 4,
-        }}
-        className="md:flex"
-      >
+      <div className="hidden md:flex items-center gap-1 font-mono text-[9px] text-muted tracking-[0.5px]">
         <span>52.52°N</span>
-        <span style={{ opacity: 0.4 }}>·</span>
+        <span className="opacity-40">·</span>
         <span>13.40°E</span>
       </div>
 
-      <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 16 }}>
+      <div className="ml-auto flex items-center gap-4">
         {!loading && total !== null && (
-          <div
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 11,
-              color: "var(--color-muted)",
-              letterSpacing: 0.5,
-            }}
-            className="hidden md:block"
-          >
+          <div className="hidden md:block font-mono text-[11px] text-muted tracking-[0.5px]">
             {total.toLocaleString("de-DE")}{" "}
-            <span style={{ opacity: 0.5 }}>Meldungen</span>
+            <span className="opacity-50">Meldungen</span>
           </div>
         )}
 
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 7,
-            fontFamily: "var(--font-mono)",
-            fontSize: 10,
-            color: "var(--color-accent)",
-            letterSpacing: 1,
-            textTransform: "uppercase",
-          }}
-        >
+        <div className="flex items-center gap-[7px] font-mono text-[10px] text-accent tracking-[1px] uppercase">
           <span
-            style={{
-              width: 5,
-              height: 5,
-              background: "var(--color-accent)",
-              animation: "pulse 2.5s ease-in-out infinite",
-              flexShrink: 0,
-            }}
+            className="w-[5px] h-[5px] bg-accent shrink-0"
+            style={{ animation: "pulse 2.5s ease-in-out infinite" }}
           />
           Live
         </div>

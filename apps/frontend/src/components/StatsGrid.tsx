@@ -14,90 +14,36 @@ export function StatsGrid({ overview, loading }: StatsGridProps) {
   const categories = loading ? dash : String(overview?.categories ?? 0);
 
   return (
-    <div
-      style={{
-        display: "grid",
-        gap: 1,
-        background: "var(--color-border)",
-      }}
-    >
-      {/* Primary stat: total */}
+    <div className="grid gap-px bg-border">
       <div
-        style={{
-          background: "var(--color-bg)",
-          padding: "10px 16px 12px",
-          borderLeft: "3px solid var(--color-accent)",
-          animation: "fadeInUp 0.35s ease both",
-        }}
+        className="bg-bg pt-[10px] px-4 pb-3 border-l-[3px] border-l-accent"
+        style={{ animation: "fadeInUp 0.35s ease both" }}
       >
-        <div
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: 52,
-            color: "var(--color-accent)",
-            lineHeight: 1,
-            letterSpacing: 1,
-          }}
-        >
+        <div className="font-display text-[52px] text-accent leading-none tracking-[1px]">
           {total}
         </div>
-        <div
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 8,
-            color: "var(--color-muted)",
-            letterSpacing: 2,
-            textTransform: "uppercase",
-            marginTop: 5,
-          }}
-        >
+        <div className="font-mono text-[8px] text-muted tracking-[2px] uppercase mt-[5px]">
           Meldungen gesamt
         </div>
       </div>
 
-      {/* Secondary stats row */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
-          gap: 1,
-          background: "var(--color-border)",
-        }}
-      >
-        {[
-          { value: today, label: "Heute" },
-          { value: districts, label: "Bezirke" },
-          { value: categories, label: "Kategorien" },
-        ].map(({ value, label }, i) => (
+      <div className="grid grid-cols-3 gap-px bg-border">
+        {(
+          [
+            { value: today, label: "Heute" },
+            { value: districts, label: "Bezirke" },
+            { value: categories, label: "Kategorien" },
+          ] as const
+        ).map(({ value, label }, i) => (
           <div
             key={label}
-            style={{
-              background: "var(--color-bg)",
-              padding: "9px 12px 9px",
-              animation: `fadeInUp 0.35s ease ${0.05 * (i + 1)}s both`,
-            }}
+            className="bg-bg py-[9px] px-3"
+            style={{ animation: `fadeInUp 0.35s ease ${0.05 * (i + 1)}s both` }}
           >
-            <div
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: 28,
-                color: "var(--color-text)",
-                lineHeight: 1,
-                opacity: 0.75,
-              }}
-            >
+            <div className="font-display text-[28px] text-text/75 leading-none">
               {value}
             </div>
-            <div
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 7,
-                color: "var(--color-muted)",
-                letterSpacing: 1.5,
-                textTransform: "uppercase",
-                marginTop: 4,
-              }}
-            >
+            <div className="font-mono text-[7px] text-muted tracking-[1.5px] uppercase mt-1">
               {label}
             </div>
           </div>

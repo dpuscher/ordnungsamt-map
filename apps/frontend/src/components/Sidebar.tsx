@@ -24,36 +24,12 @@ interface SidebarProps {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
-        fontFamily: "var(--font-sans)",
-        fontWeight: 600,
-        fontSize: 10,
-        letterSpacing: 1,
-        color: "var(--color-muted)",
-        textTransform: "uppercase",
-        marginBottom: 12,
-      }}
-    >
+    <div className="flex items-center gap-[10px] font-sans font-semibold text-[10px] tracking-[1px] text-muted uppercase mb-3">
       {children}
-      <span
-        style={{
-          flex: 1,
-          height: 1,
-          background: "var(--color-border)",
-        }}
-      />
+      <span className="flex-1 h-px bg-border" />
     </div>
   );
 }
-
-const sectionStyle: React.CSSProperties = {
-  padding: 16,
-  borderBottom: "1px solid var(--color-border)",
-};
 
 export function Sidebar({
   isOpen,
@@ -72,44 +48,34 @@ export function Sidebar({
 }: SidebarProps) {
   return (
     <aside
-      className={`absolute md:relative h-full w-full md:w-[280px] flex-col shrink-0 overflow-y-auto shadow-2xl md:shadow-none ${
+      className={`absolute md:relative h-full w-full md:w-[280px] flex-col shrink-0 overflow-y-auto shadow-2xl md:shadow-none z-[2000] bg-surface border-r border-border ${
         isOpen ? "flex" : "hidden md:flex"
       }`}
-      style={{
-        zIndex: 2000,
-        background: "var(--color-surface)",
-        borderRight: "1px solid var(--color-border)",
-      }}
     >
-      {/* Stats */}
-      <div style={{ borderBottom: "1px solid var(--color-border)" }}>
-        <div style={{ padding: "14px 16px 10px" }}>
+      <div className="border-b border-border">
+        <div className="px-4 pt-[14px] pb-[10px]">
           <SectionLabel>Statistiken</SectionLabel>
         </div>
         <StatsGrid overview={overview} loading={statsLoading} />
       </div>
 
-      {/* Layer controls */}
-      <div style={sectionStyle}>
+      <div className="p-4 border-b border-border">
         <SectionLabel>Darstellung</SectionLabel>
         <LayerControls displayMode={displayMode} onModeChange={onDisplayModeChange} />
       </div>
 
-      {/* Date filter */}
-      <div style={sectionStyle}>
+      <div className="p-4 border-b border-border">
         <SectionLabel>Zeitraum</SectionLabel>
         <DateFilter from={from} to={to} onChange={onDateChange} />
       </div>
 
-      {/* District filter */}
-      <div style={sectionStyle}>
+      <div className="p-4 border-b border-border">
         <SectionLabel>Bezirk</SectionLabel>
         <DistrictFilter active={district} onChange={onDistrictChange} />
       </div>
 
-      {/* Category list */}
       <div>
-        <div style={{ padding: "14px 16px 10px" }}>
+        <div className="px-4 pt-[14px] pb-[10px]">
           <SectionLabel>Kategorien</SectionLabel>
         </div>
         <CategoryList categories={categories} active={category} onChange={onCategoryChange} />

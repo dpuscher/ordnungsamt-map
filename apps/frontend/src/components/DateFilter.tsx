@@ -1,4 +1,6 @@
 import React from "react";
+import { cva } from "class-variance-authority";
+import { cn } from "../lib/utils";
 
 interface DateFilterProps {
   from: string | undefined;
@@ -12,6 +14,21 @@ const presets = [
   { label: "1J", days: 365 },
   { label: "Alle", days: null as number | null },
 ] as const;
+
+const presetButtonVariants = cva(
+  "py-2 px-1 text-[10px] font-mono tracking-[0.5px] border-none border-b-2 cursor-pointer transition-all duration-150",
+  {
+    variants: {
+      active: {
+        true: "bg-accent/[0.08] border-accent text-accent",
+        false: "bg-bg border-transparent text-muted",
+      },
+    },
+  },
+);
+
+const inputClass =
+  "w-full py-[7px] px-2 text-[11px] font-mono bg-bg border border-border text-text rounded-none outline-none tracking-[0.3px] mt-[5px]";
 
 export function DateFilter({ from, to, onChange }: DateFilterProps) {
   const setPreset = (days: number | null) => {
@@ -34,96 +51,39 @@ export function DateFilter({ from, to, onChange }: DateFilterProps) {
     return from === start.toISOString().split("T")[0] && to === now.toISOString().split("T")[0];
   };
 
-  const inputStyle: React.CSSProperties = {
-    boxSizing: "border-box",
-    width: "100%",
-    padding: "7px 8px",
-    fontSize: 11,
-    fontFamily: "var(--font-mono)",
-    background: "var(--color-bg)",
-    border: "1px solid var(--color-border)",
-    color: "var(--color-text)",
-    borderRadius: 0,
-    marginTop: 5,
-    outline: "none",
-    letterSpacing: 0.3,
-    colorScheme: "dark",
-  };
-
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      {/* Preset buttons */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
-          gap: 1,
-          background: "var(--color-border)",
-        }}
-      >
-        {presets.map(({ label, days }) => {
-          const active = isPresetActive(days);
-          return (
-            <button
-              key={label}
-              style={{
-                padding: "8px 4px",
-                fontSize: 10,
-                fontFamily: "var(--font-mono)",
-                letterSpacing: 0.5,
-                background: active ? "rgba(232,255,60,0.08)" : "var(--color-bg)",
-                border: "none",
-                borderBottom: active ? "2px solid var(--color-accent)" : "2px solid transparent",
-                color: active ? "var(--color-accent)" : "var(--color-muted)",
-                cursor: "pointer",
-                transition: "all 0.15s",
-              }}
-              onClick={() => setPreset(days)}
-            >
-              {label}
-            </button>
-          );
-        })}
+    <div className="flex flex-col gap-[10px]">
+      <div className="grid grid-cols-4 gap-px bg-border">
+        {presets.map(({ label, days }) => (
+          <button
+            key={label}
+            onClick={() => setPreset(days)}
+            className={cn(presetButtonVariants({ active: isPresetActive(days) }))}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
-      {/* Date inputs */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+      <div className="grid grid-cols-2 gap-2">
         <div>
-          <div
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 8,
-              color: "var(--color-muted)",
-              textTransform: "uppercase",
-              letterSpacing: 1.5,
-            }}
-          >
-            Von
-          </div>
+          <div className="font-mono text-[8px] text-muted uppercase tracking-[1.5px]">Von</div>
           <input
             type="date"
             value={from || ""}
             onChange={e => onChange(e.target.value || undefined, to)}
-            style={inputStyle}
+            className={inputClass}
+            style={{ colorScheme: "dark" }}
           />
         </div>
         <div>
-          <div
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 8,
-              color: "var(--color-muted)",
-              textTransform: "uppercase",
-              letterSpacing: 1.5,
-            }}
-          >
-            Bis
-          </div>
+          <div className="font-mono text-[8px] text-muted uppercase tracking-[1.5px]">Bis</div>
           <input
             type="date"
             value={to || ""}
             onChange={e => onChange(from, e.target.value || undefined)}
-            style={inputStyle}
+            className={inputClass}
+            style={{ colorScheme: "dark" }}
           />
         </div>
       </div>

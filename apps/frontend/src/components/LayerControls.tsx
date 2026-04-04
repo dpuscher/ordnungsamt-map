@@ -1,62 +1,42 @@
+import { cva } from "class-variance-authority";
+import { cn } from "../lib/utils";
 import type { MapDisplayMode } from "@ordnungsamt/shared";
+
+const modeButtonVariants = cva(
+  "flex-1 border-none border-b-2 font-mono text-[10px] tracking-[1.5px] uppercase cursor-pointer transition-all duration-150 py-[10px] px-3 pb-[9px]",
+  {
+    variants: {
+      active: {
+        true: "bg-accent/[0.07] border-accent text-accent",
+        false: "bg-bg border-transparent text-muted",
+      },
+    },
+  },
+);
 
 interface LayerControlsProps {
   displayMode: MapDisplayMode;
   onModeChange: (mode: MapDisplayMode) => void;
 }
 
-function ModeButton({
-  active,
-  label,
-  onClick,
-}: {
-  active: boolean;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        flex: 1,
-        border: "none",
-        borderBottom: active ? "2px solid var(--color-accent)" : "2px solid transparent",
-        background: active ? "rgba(232,255,60,0.07)" : "var(--color-bg)",
-        color: active ? "var(--color-accent)" : "var(--color-muted)",
-        fontFamily: "var(--font-mono)",
-        fontSize: 10,
-        letterSpacing: 1.5,
-        textTransform: "uppercase",
-        padding: "10px 12px 9px",
-        cursor: "pointer",
-        transition: "background 0.15s, color 0.15s, border-color 0.15s",
-      }}
-    >
-      {label}
-    </button>
-  );
-}
-
 export function LayerControls({ displayMode, onModeChange }: LayerControlsProps) {
   return (
-    <div
-      style={{
-        display: "flex",
-        gap: 1,
-        background: "var(--color-border)",
-      }}
-    >
-      <ModeButton
-        label="Heatmap"
-        active={displayMode === "heatmap"}
-        onClick={() => onModeChange("heatmap")}
-      />
-      <ModeButton
-        label="Punkte"
-        active={displayMode === "points"}
-        onClick={() => onModeChange("points")}
-      />
+    <div className="flex gap-px bg-border">
+      {(
+        [
+          { mode: "heatmap", label: "Heatmap" },
+          { mode: "points", label: "Punkte" },
+        ] as const
+      ).map(({ mode, label }) => (
+        <button
+          key={mode}
+          type="button"
+          onClick={() => onModeChange(mode)}
+          className={cn(modeButtonVariants({ active: displayMode === mode }))}
+        >
+          {label}
+        </button>
+      ))}
     </div>
   );
 }
