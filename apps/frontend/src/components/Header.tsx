@@ -34,7 +34,7 @@ export function Header({ total, loading, onToggleSidebar, sidebarOpen }: HeaderP
         </button>
       )}
 
-      <div className="flex items-baseline">
+      <div className="flex items-center">
         <span className="font-display text-xl tracking-[3px] text-accent leading-none">
           ORDNUNGSAMT
         </span>
