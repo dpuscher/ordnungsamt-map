@@ -8,7 +8,14 @@ interface DistrictFilterProps {
 
 export function DistrictFilter({ active, onChange }: DistrictFilterProps) {
   return (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: 1,
+        background: "var(--color-border)",
+      }}
+    >
       {DISTRICTS.map(district => {
         const isActive = active === district;
         return (
@@ -16,27 +23,31 @@ export function DistrictFilter({ active, onChange }: DistrictFilterProps) {
             key={district}
             onClick={() => onChange(isActive ? undefined : district)}
             style={{
-              background: isActive ? "rgba(232,255,60,0.1)" : "var(--color-bg)",
-              border: `1px solid ${isActive ? "var(--color-accent)" : "var(--color-border)"}`,
+              background: isActive ? "rgba(232,255,60,0.08)" : "var(--color-bg)",
+              border: "none",
+              borderLeft: isActive ? "2px solid var(--color-accent)" : "2px solid transparent",
               color: isActive ? "var(--color-accent)" : "var(--color-muted)",
               fontFamily: "var(--font-sans)",
-              fontSize: 12,
-              padding: "5px 10px",
-              borderRadius: 4,
+              fontWeight: 500,
+              fontSize: 11,
+              padding: "8px 10px",
               cursor: "pointer",
               transition: "all 0.15s",
-              whiteSpace: "nowrap",
+              textAlign: "left",
+              lineHeight: 1.2,
             }}
             onMouseEnter={e => {
               if (!isActive) {
-                (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--color-accent)";
-                (e.currentTarget as HTMLButtonElement).style.color = "var(--color-accent)";
+                const el = e.currentTarget as HTMLButtonElement;
+                el.style.color = "var(--color-text)";
+                el.style.background = "rgba(255,255,255,0.03)";
               }
             }}
             onMouseLeave={e => {
               if (!isActive) {
-                (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--color-border)";
-                (e.currentTarget as HTMLButtonElement).style.color = "var(--color-muted)";
+                const el = e.currentTarget as HTMLButtonElement;
+                el.style.color = "var(--color-muted)";
+                el.style.background = "var(--color-bg)";
               }
             }}
           >

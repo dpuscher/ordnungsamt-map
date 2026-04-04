@@ -1,19 +1,19 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;600&family=Bebas+Neue&family=JetBrains+Mono:wght@400;500&display=swap");
 @import "leaflet/dist/leaflet.css";
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #0a0c10;
-  --color-surface: #111318;
-  --color-border: #1e2229;
+  --color-bg: #07090e;
+  --color-surface: #0d1018;
+  --color-border: #1a1f2a;
   --color-accent: #e8ff3c;
   --color-danger: #ff4c38;
   --color-heat1: #00d4ff;
-  --color-text: #e2e4e8;
-  --color-muted: #5a5f6e;
+  --color-text: #d8dbe6;
+  --color-muted: #7a8299;
 
-  --font-sans: "DM Sans", sans-serif;
-  --font-mono: "DM Mono", monospace;
+  --font-sans: "Barlow Semi Condensed", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
   --font-display: "Bebas Neue", sans-serif;
 }
 
@@ -27,6 +27,8 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 400;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -41,33 +43,45 @@ body {
 
 /* Leaflet overrides */
 .leaflet-container {
-  background: #0a0c10 !important;
+  background: #07090e !important;
 }
 
 .leaflet-popup-content-wrapper {
-  background: rgba(17, 19, 24, 0.96) !important;
-  border: 1px solid #1e2229 !important;
-  border-radius: 8px !important;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6) !important;
-  color: #e2e4e8 !important;
+  background: rgba(13, 16, 24, 0.97) !important;
+  border: 1px solid #1a1f2a !important;
+  border-radius: 0 !important;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(232,255,60,0.04) !important;
+  color: #d8dbe6 !important;
 }
 
 .leaflet-popup-tip {
-  background: rgba(17, 19, 24, 0.96) !important;
+  background: rgba(13, 16, 24, 0.97) !important;
 }
 
 .leaflet-popup-close-button {
-  color: #5a5f6e !important;
+  color: #4e5568 !important;
+  font-family: "JetBrains Mono", monospace !important;
+  font-size: 16px !important;
 }
 
 /* Scrollbar */
 ::-webkit-scrollbar {
-  width: 4px;
+  width: 3px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e2229;
-  border-radius: 2px;
+  background: #1a1f2a;
+  border-radius: 0;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }

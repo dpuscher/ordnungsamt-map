@@ -20,16 +20,17 @@ function ModeButton({
       onClick={onClick}
       style={{
         flex: 1,
-        border: "1px solid var(--color-border)",
-        background: active ? "var(--color-accent)" : "rgba(255,255,255,0.02)",
-        color: active ? "#0a0c10" : "var(--color-text)",
+        border: "none",
+        borderBottom: active ? "2px solid var(--color-accent)" : "2px solid transparent",
+        background: active ? "rgba(232,255,60,0.07)" : "var(--color-bg)",
+        color: active ? "var(--color-accent)" : "var(--color-muted)",
         fontFamily: "var(--font-mono)",
-        fontSize: 11,
-        letterSpacing: 1,
+        fontSize: 10,
+        letterSpacing: 1.5,
         textTransform: "uppercase",
-        padding: "10px 12px",
+        padding: "10px 12px 9px",
         cursor: "pointer",
-        transition: "background 0.2s ease, color 0.2s ease, border-color 0.2s ease",
+        transition: "background 0.15s, color 0.15s, border-color 0.15s",
       }}
     >
       {label}
@@ -39,17 +40,23 @@ function ModeButton({
 
 export function LayerControls({ displayMode, onModeChange }: LayerControlsProps) {
   return (
-      <div style={{ display: "flex", gap: 8 }}>
-        <ModeButton
-          label="Heatmap"
-          active={displayMode === "heatmap"}
-          onClick={() => onModeChange("heatmap")}
-        />
-        <ModeButton
-          label="Punkte"
-          active={displayMode === "points"}
-          onClick={() => onModeChange("points")}
-        />
-      </div>
+    <div
+      style={{
+        display: "flex",
+        gap: 1,
+        background: "var(--color-border)",
+      }}
+    >
+      <ModeButton
+        label="Heatmap"
+        active={displayMode === "heatmap"}
+        onClick={() => onModeChange("heatmap")}
+      />
+      <ModeButton
+        label="Punkte"
+        active={displayMode === "points"}
+        onClick={() => onModeChange("points")}
+      />
+    </div>
   );
 }

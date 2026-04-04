@@ -44,6 +44,6 @@ export const MapQuerySchema = z.object({
   maxLng: z.coerce.number().optional(),
   district: z.string().optional(),
   category: z.string().optional(),
-  from: z.string().datetime().optional(),
-  to: z.string().datetime().optional(),
+  from: z.string().date().optional(),
+  to: z.string().date().optional(),
 });

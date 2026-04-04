@@ -5,35 +5,34 @@ export function Legend() {
     <div
       style={{
         position: "absolute",
-        bottom: 24,
-        right: 24,
+        bottom: 20,
+        right: 20,
         zIndex: 1000,
-        background: "rgba(17,19,24,0.92)",
+        background: "rgba(13,16,24,0.95)",
         border: "1px solid var(--color-border)",
-        borderRadius: 8,
-        padding: "14px 16px",
-        backdropFilter: "blur(8px)",
+        borderLeft: "2px solid var(--color-accent)",
+        padding: "12px 14px",
+        backdropFilter: "blur(12px)",
       }}
     >
       <div
         style={{
           fontFamily: "var(--font-mono)",
-          fontSize: 10,
-          letterSpacing: 1.5,
+          fontSize: 8,
+          letterSpacing: 2,
           color: "var(--color-muted)",
           textTransform: "uppercase",
-          marginBottom: 10,
+          marginBottom: 8,
         }}
       >
         Intensität
       </div>
       <div
         style={{
-          width: 160,
-          height: 10,
-          borderRadius: 5,
+          width: 140,
+          height: 6,
           background: "linear-gradient(to right, #00d4ff, #e8ff3c, #ff4c38)",
-          marginBottom: 6,
+          marginBottom: 5,
         }}
       />
       <div
@@ -41,8 +40,9 @@ export function Legend() {
           display: "flex",
           justifyContent: "space-between",
           fontFamily: "var(--font-mono)",
-          fontSize: 10,
+          fontSize: 8,
           color: "var(--color-muted)",
+          letterSpacing: 0.5,
         }}
       >
         <span>Niedrig</span>

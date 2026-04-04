@@ -7,7 +7,6 @@ import { useStats } from "./hooks/useStats";
 
 export default function App() {
   const prefs = usePreferences();
-  const stats = useStats();
 
   const filters = useMemo(
     () => ({
@@ -18,6 +17,8 @@ export default function App() {
     }),
     [prefs.district, prefs.category, prefs.from, prefs.to],
   );
+
+  const stats = useStats(filters);
 
   return (
     <>
@@ -36,9 +37,15 @@ export default function App() {
           displayMode={prefs.displayMode}
           district={prefs.district}
           category={prefs.category}
+          from={prefs.from}
+          to={prefs.to}
           onDisplayModeChange={prefs.setDisplayMode}
           onDistrictChange={prefs.setDistrict}
           onCategoryChange={prefs.setCategory}
+          onDateChange={(from, to) => {
+            prefs.setFrom(from);
+            prefs.setTo(to);
+          }}
         />
         <Map
           filters={filters}

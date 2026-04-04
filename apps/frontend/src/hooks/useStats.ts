@@ -30,7 +30,14 @@ export interface Stats {
   loading: boolean;
 }
 
-export function useStats(): Stats {
+export interface StatsFilters {
+  district?: string;
+  category?: string;
+  from?: string;
+  to?: string;
+}
+
+export function useStats(filters: StatsFilters = {}): Stats {
   const [overview, setOverview] = useState<StatsOverview | null>(null);
   const [timeseries, setTimeseries] = useState<StatTimeseries[]>([]);
   const [districts, setDistricts] = useState<StatDistrict[]>([]);
@@ -39,10 +46,23 @@ export function useStats(): Stats {
 
   useEffect(() => {
     const controller = new AbortController();
+
+    function buildQuery(overrides: Partial<StatsFilters> = {}): string {
+      const merged = { ...filters, ...overrides };
+      const params = new URLSearchParams();
+      if (merged.district) params.set("district", merged.district);
+      if (merged.category) params.set("category", merged.category);
+      if (merged.from) params.set("from", merged.from);
+      if (merged.to) params.set("to", merged.to);
+      const search = params.toString();
+      return search ? `?${search}` : "";
+    }
+
     const base = `${API_BASE}/api/stats`;
     void Promise.allSettled([
-      fetchJson<StatsOverview>(`${base}/overview`, controller.signal),
-      fetchJson<StatCategory[]>(`${base}/categories`, controller.signal),
+      fetchJson<StatsOverview>(`${base}/overview${buildQuery()}`, controller.signal),
+      // Omit category so all categories remain visible with their filtered counts
+      fetchJson<StatCategory[]>(`${base}/categories${buildQuery({ category: undefined })}`, controller.signal),
     ])
       .then(([overviewResult, categoriesResult]) => {
         if (overviewResult.status === "fulfilled") {
@@ -63,13 +83,14 @@ export function useStats(): Stats {
         }
       });
 
-    void fetchJson<StatTimeseries[]>(`${base}/timeseries`, controller.signal)
+    void fetchJson<StatTimeseries[]>(`${base}/timeseries${buildQuery()}`, controller.signal)
       .then(setTimeseries)
       .catch(error => {
         logStatsError("timeseries", error);
       });
 
-    void fetchJson<StatDistrict[]>(`${base}/districts`, controller.signal)
+    // Omit district so all districts remain visible with their filtered counts
+    void fetchJson<StatDistrict[]>(`${base}/districts${buildQuery({ district: undefined })}`, controller.signal)
       .then(setDistricts)
       .catch(error => {
         logStatsError("districts", error);
@@ -78,7 +99,7 @@ export function useStats(): Stats {
     return () => {
       controller.abort();
     };
-  }, []);
+  }, [filters.district, filters.category, filters.from, filters.to]);
 
   return { overview, timeseries, districts, categories, loading };
 }
