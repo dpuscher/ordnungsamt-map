@@ -32,8 +32,7 @@ function getUrlParam(key: string): string | undefined {
 export interface Preferences {
   district: string | undefined;
   category: string | undefined;
-  from: string | undefined;
-  to: string | undefined;
+  days: number | null;
   displayMode: MapDisplayMode;
   mapLat: number;
   mapLng: number;
@@ -44,8 +43,7 @@ export interface Preferences {
 export interface PreferencesActions {
   setDistrict: (v: string | undefined) => void;
   setCategory: (v: string | undefined) => void;
-  setFrom: (v: string | undefined) => void;
-  setTo: (v: string | undefined) => void;
+  setDays: (v: number | null) => void;
   setDisplayMode: (v: MapDisplayMode) => void;
   setMapPosition: (lat: number, lng: number, zoom: number) => void;
   setSidebarOpen: (v: boolean) => void;
@@ -54,11 +52,7 @@ export interface PreferencesActions {
 function getInitialDisplayMode(): MapDisplayMode {
   const storedMode = readPref<MapDisplayMode | undefined>("displayMode");
   if (storedMode === "heatmap" || storedMode === "points") return storedMode;
-
-  const legacyHeatVisible = readPref<boolean | undefined>("heatVisible");
-  if (legacyHeatVisible === false) return "points";
-
-  return "heatmap";
+  return "points";
 }
 
 export function usePreferences(): Preferences & PreferencesActions {
@@ -68,12 +62,12 @@ export function usePreferences(): Preferences & PreferencesActions {
   const [category, setCategoryState] = useState<string | undefined>(
     () => getUrlParam("category") ?? readPref<string | undefined>("category"),
   );
-  const [from, setFromState] = useState<string | undefined>(
-    () => getUrlParam("from") ?? readPref<string | undefined>("from"),
-  );
-  const [to, setToState] = useState<string | undefined>(
-    () => getUrlParam("to") ?? readPref<string | undefined>("to"),
-  );
+  const [days, setDaysState] = useState<number | null>(() => {
+    const urlDays = getUrlParam("days");
+    if (urlDays === "all") return null;
+    if (urlDays) return Number(urlDays) || null;
+    return readPref<number | null>("days", null);
+  });
   const [displayMode, setDisplayModeState] = useState<MapDisplayMode>(getInitialDisplayMode);
   const [mapLat, setMapLat] = useState(() => readPref("mapLat", DEFAULT_MAP_CENTER[0]));
   const [mapLng, setMapLng] = useState(() => readPref("mapLng", DEFAULT_MAP_CENTER[1]));
@@ -85,14 +79,13 @@ export function usePreferences(): Preferences & PreferencesActions {
     const params = new URLSearchParams();
     if (district) params.set("district", district);
     if (category) params.set("category", category);
-    if (from) params.set("from", from);
-    if (to) params.set("to", to);
+    if (days !== null) params.set("days", String(days));
     const search = params.toString();
     const newUrl = search
       ? `${globalThis.location.pathname}?${search}`
       : globalThis.location.pathname;
     globalThis.history.replaceState(null, "", newUrl);
-  }, [district, category, from, to]);
+  }, [district, category, days]);
 
   const setDistrict = useCallback((value: string | undefined) => {
     setDistrictState(value);
@@ -102,13 +95,9 @@ export function usePreferences(): Preferences & PreferencesActions {
     setCategoryState(value);
     writePref("category", value);
   }, []);
-  const setFrom = useCallback((value: string | undefined) => {
-    setFromState(value);
-    writePref("from", value);
-  }, []);
-  const setTo = useCallback((value: string | undefined) => {
-    setToState(value);
-    writePref("to", value);
+  const setDays = useCallback((value: number | null) => {
+    setDaysState(value);
+    writePref("days", value);
   }, []);
   const setDisplayMode = useCallback((value: MapDisplayMode) => {
     setDisplayModeState(value);
@@ -132,8 +121,7 @@ export function usePreferences(): Preferences & PreferencesActions {
   return {
     district,
     category,
-    from,
-    to,
+    days,
     displayMode,
     mapLat,
     mapLng,
@@ -141,8 +129,7 @@ export function usePreferences(): Preferences & PreferencesActions {
     sidebarOpen,
     setDistrict,
     setCategory,
-    setFrom,
-    setTo,
+    setDays,
     setDisplayMode,
     setMapPosition,
     setSidebarOpen,

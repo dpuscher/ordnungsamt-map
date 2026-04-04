@@ -14,12 +14,11 @@ interface SidebarProps {
   displayMode: MapDisplayMode;
   district: string | undefined;
   category: string | undefined;
-  from: string | undefined;
-  to: string | undefined;
+  days: number | null;
   onDisplayModeChange: (mode: MapDisplayMode) => void;
   onDistrictChange: (v: string | undefined) => void;
   onCategoryChange: (v: string | undefined) => void;
-  onDateChange: (from: string | undefined, to: string | undefined) => void;
+  onDaysChange: (days: number | null) => void;
 }
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
@@ -39,12 +38,11 @@ export function Sidebar({
   displayMode,
   district,
   category,
-  from,
-  to,
+  days,
   onDisplayModeChange,
   onDistrictChange,
   onCategoryChange,
-  onDateChange,
+  onDaysChange,
 }: SidebarProps) {
   return (
     <aside
@@ -66,7 +64,7 @@ export function Sidebar({
 
       <div className="p-4 border-b border-border">
         <SectionLabel>Zeitraum</SectionLabel>
-        <DateFilter from={from} to={to} onChange={onDateChange} />
+        <DateFilter days={days} onChange={onDaysChange} />
       </div>
 
       <div className="p-4 border-b border-border">

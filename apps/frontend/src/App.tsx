@@ -5,6 +5,17 @@ import { Map } from "./components/Map";
 import { usePreferences } from "./hooks/usePreferences";
 import { useStats } from "./hooks/useStats";
 
+function daysToDateRange(days: number | null): { from?: string; to?: string } {
+  if (days === null) return {};
+  const to = new Date();
+  const from = new Date();
+  from.setDate(to.getDate() - days);
+  return {
+    from: from.toISOString().split("T")[0],
+    to: to.toISOString().split("T")[0],
+  };
+}
+
 export default function App() {
   const prefs = usePreferences();
 
@@ -12,10 +23,9 @@ export default function App() {
     () => ({
       district: prefs.district,
       category: prefs.category,
-      from: prefs.from,
-      to: prefs.to,
+      ...daysToDateRange(prefs.days),
     }),
-    [prefs.district, prefs.category, prefs.from, prefs.to],
+    [prefs.district, prefs.category, prefs.days],
   );
 
   const stats = useStats(filters);
@@ -37,15 +47,11 @@ export default function App() {
           displayMode={prefs.displayMode}
           district={prefs.district}
           category={prefs.category}
-          from={prefs.from}
-          to={prefs.to}
+          days={prefs.days}
           onDisplayModeChange={prefs.setDisplayMode}
           onDistrictChange={prefs.setDistrict}
           onCategoryChange={prefs.setCategory}
-          onDateChange={(from, to) => {
-            prefs.setFrom(from);
-            prefs.setTo(to);
-          }}
+          onDaysChange={prefs.setDays}
         />
         <Map
           filters={filters}

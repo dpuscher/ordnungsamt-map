@@ -138,17 +138,11 @@ function spatialSample(points: ClusteredPoint[], maxCount: number, minSep: numbe
   return selected;
 }
 
-function getFetchPadding(displayMode: MapDisplayMode, zoom: number): number {
-  if (displayMode === "points") {
-    // Raw pins only at zoom 17+: fetch just the visible viewport (tiny pad to avoid edge gaps)
-    if (zoom >= 17) return 0.05;
-    if (zoom >= 13) return 0.18;
-    return 0.1;
-  }
-
-  if (zoom >= 16) return 0.28;
-  if (zoom >= 13) return 0.18;
-  return 0.1;
+function getFetchPadding(zoom: number): number {
+  // Small pad to avoid edge gaps when panning slightly; don't pre-fetch large buffers
+  // because that causes the map to appear unresponsive to small pans.
+  if (zoom >= 17) return 0.03;
+  return 0.05;
 }
 
 function normalizeHouseNumber(houseNumber: string | null): string | null {
@@ -251,7 +245,7 @@ export function Map({
   const triggerFetch = useCallback(
     (map: LeafletMap) => {
       const zoom = map.getZoom();
-      const bounds = map.getBounds().pad(getFetchPadding(displayMode, zoom));
+      const bounds = map.getBounds().pad(getFetchPadding(zoom));
       void fetchData(
         zoom,
         displayMode,
