@@ -8,8 +8,8 @@ export interface TransformedMeldung {
   district: string;
   status: string;
   description: string | null;
-  lat: number;
-  lng: number;
+  lat: number | null;
+  lng: number | null;
   reportNumber: string | null;
   street: string | null;
   houseNumber: string | null;

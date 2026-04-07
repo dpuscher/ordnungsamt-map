@@ -4,6 +4,8 @@ import { fileURLToPath } from "node:url";
 import pg from "pg";
 import type { TransformedMeldung } from "./transform.js";
 
+import type { OAMeldung } from "@ordnungsamt/shared";
+
 const { Pool } = pg;
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -19,10 +21,49 @@ export async function runMigrations(): Promise<void> {
   console.log("[db] Migrations applied.");
 }
 
-/** Returns the set of all IDs already stored in the DB. */
+/** Returns the set of all IDs already stored in the DB (including ignored ones). */
 export async function getExistingIds(): Promise<Set<string>> {
-  const result = await pool.query(`SELECT id FROM meldungen`);
+  const result = await pool.query(`
+    SELECT id FROM meldungen
+    UNION ALL
+    SELECT id FROM meldungen_ignored
+  `);
   return new Set(result.rows.map((r: { id: string }) => r.id));
+}
+
+export async function upsertIgnoredMeldungen(items: OAMeldung[]): Promise<void> {
+  if (items.length === 0) return;
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    for (const item of items) {
+      await client.query(
+        `INSERT INTO meldungen_ignored (id, raw_json, first_seen_at)
+         VALUES ($1, $2, NOW())
+         ON CONFLICT (id) DO UPDATE SET raw_json = EXCLUDED.raw_json`,
+        [String(item.id), JSON.stringify(item)]
+      );
+    }
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.warn("[db] Upsert ignored batch failed. Retrying rows individually.");
+    for (const item of items) {
+      try {
+        await client.query(
+          `INSERT INTO meldungen_ignored (id, raw_json, first_seen_at)
+           VALUES ($1, $2, NOW())
+           ON CONFLICT (id) DO UPDATE SET raw_json = EXCLUDED.raw_json`,
+          [String(item.id), JSON.stringify(item)]
+        );
+      } catch (rowError) {
+        const rowErrorMessage = rowError instanceof Error ? rowError.message : String(rowError);
+        console.error(`[db] Failed to upsert ignored meldung ${item.id}: ${rowErrorMessage}`);
+      }
+    }
+  } finally {
+    client.release();
+  }
 }
 
 export interface UpsertResult {

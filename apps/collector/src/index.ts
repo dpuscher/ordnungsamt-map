@@ -2,6 +2,7 @@ import cron from "node-cron";
 import {
   runMigrations,
   upsertMeldungen,
+  upsertIgnoredMeldungen,
   refreshMaterializedViews,
   logRun,
   getExistingIds,
@@ -59,11 +60,23 @@ async function runCollector(): Promise<void> {
         `[collector] Batch ${batchStart}-${batchEnd}: got coordinates for ${details.size}/${batch.length}`,
       );
 
-      const meldungen = batch
-        .map(item => transformMeldung(item, details.get(item.id)))
-        .filter((meldung): meldung is TransformedMeldung => meldung !== null);
+      const meldungen: TransformedMeldung[] = [];
+      const ignoredItems = [];
+
+      for (const item of batch) {
+        const meldung = transformMeldung(item, details.get(item.id));
+        if (meldung !== null) {
+          meldungen.push(meldung);
+        } else {
+          ignoredItems.push(item);
+        }
+      }
 
       withCoords += meldungen.length;
+
+      if (ignoredItems.length > 0) {
+        await upsertIgnoredMeldungen(ignoredItems);
+      }
 
       if (meldungen.length === 0) {
         continue;

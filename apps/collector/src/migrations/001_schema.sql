@@ -81,3 +81,10 @@ CREATE TABLE IF NOT EXISTS logs_collector (
   updated     INTEGER,
   error       TEXT
 );
+
+-- Ignored records (no coordinates or otherwise unprocessable)
+CREATE TABLE IF NOT EXISTS meldungen_ignored (
+  id            TEXT        PRIMARY KEY,
+  raw_json      JSONB       NOT NULL,
+  first_seen_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
