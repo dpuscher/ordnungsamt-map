@@ -26,7 +26,7 @@ function buildStatsFilter(district?: string, category?: string, from?: string, t
     values.push(from);
   }
   if (to) {
-    conditions.push(`date <= $${values.length + 1}`);
+    conditions.push(`date < $${values.length + 1}::date + interval '1 day'`);
     values.push(to);
   }
 
